@@ -1,0 +1,12 @@
+Statistic: mean
+f1-score        0.895683
+precision       0.901956
+recall          0.896722
+support      9000.000000
+Name: macro avg, dtype: float64
+Statistic: std
+f1-score     0.002302
+precision    0.002364
+recall       0.002165
+support      0.000000
+Name: macro avg, dtype: float64

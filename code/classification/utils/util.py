@@ -1,5 +1,6 @@
 import re
 import os
+from os.path import join, dirname, abspath, pardir, basename, normpath
 import json
 
 import random
@@ -12,6 +13,10 @@ from multiprocessing import cpu_count
 from joblib import Parallel, delayed
 from functools import partial
 
+BASE_DIR = abspath(join(dirname(__file__), pardir, pardir, pardir))
+CODE_DIR = join(BASE_DIR, 'code')
+COLLEC_DIR = join(CODE_DIR, 'collection')
+ALL_URL_LIST = join(COLLEC_DIR, 'short_list_500')
 
 # MATH FUNCTIONS:
 def harmonic_mean(x, y, factor=1.0):
@@ -341,9 +346,10 @@ PATH_REGEX = {'name': r'(?P<name>\w+)',
 FNAME_REGEX = re.compile('{name}/{dev}{sites}{date}{inst}'.format(**PATH_REGEX))
 
 # paths
-DEFAULT_PICKLE_FILE = 'indexow.pickle'
-DATA_DIR = '../../experiments/processed_traces'
-
+BASE_DIR = abspath(join(dirname(__file__), pardir, pardir, pardir))
+DATA_DIR = join(BASE_DIR, 'dataset')
+PICKLE_DIR = join(DATA_DIR, 'pickles')
+DEFAULT_PICKLE_FILE = join(PICKLE_DIR, 'index.pickle')
 
 def load_data(path=DEFAULT_PICKLE_FILE, pickle=True):
     """Load dataset.
@@ -361,8 +367,10 @@ def load_data(path=DEFAULT_PICKLE_FILE, pickle=True):
             df = pd.read_pickle(path)
         else:
             df = parse_directory(path)
+            dataset = basename(normpath(path))
+            PICKLE_FILE = join(PICKLE_DIR, '%s.pickle' % dataset)
             if pickle:
-                pickle_path = DEFAULT_PICKLE_FILE
+                pickle_path = PICKLE_FILE
                 if type(pickle) is str:
                     pickle_path = pickle
                 print "Pickling to", pickle_path
@@ -447,8 +455,7 @@ def apply_parallel(dfGrouped, func):
 # OTHER UTILS
 def load_mapping():
     """Return Alexa as a list."""
-    ALEXA_LIST = '../collection/short_list_500'
-    return [l.strip() for l in open(ALEXA_LIST)]
+    return [l.strip() for l in open(ALL_URL_LIST)]
 ALEXA_MAP = load_mapping()
 
 

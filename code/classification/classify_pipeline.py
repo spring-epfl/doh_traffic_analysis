@@ -146,7 +146,7 @@ def get_url_list(url_list):
 
 
 def time_experiment():
-     """Performs the time experiment with LOC1 dataset (Section 5B of the paper)"""
+    """Performs the time experiment with LOC1 dataset (Section 5B of the paper)"""
     dataset = 'loc1'
     data_dir = join(DATA_DIR, dataset)
     pickle_path = join(CLASSIF_DIR, '%s.pickle' % dataset)
@@ -257,10 +257,18 @@ def normal_experiment(remove_bad=False):
 
     dataset = 'loc1'
     data_dir = join(DATA_DIR, dataset)
-    pickle_path = join(DATA_DIR, '%s.pickle' % dataset)
+    pickle_path = join(DATA_DIR, 'pickles', '%s.pickle' % dataset)
+    print pickle_path
     urls = get_url_list(ALL_URL_LIST)
     num_classes = 1500
     num_samples = 60
+
+    # instantiate paths specific to experiment
+    EXP_RESULTS_DIR = join(RESULTS_DIR, '%s') % 'normal'
+    OUTPUT_STATS = join(EXP_RESULTS_DIR, 'stats')
+    OUTPUT_REPORT = join(EXP_RESULTS_DIR, 'report')
+    OUTPUT_TP = join(EXP_RESULTS_DIR, 'tp_')
+    OUTPUT_ACC = join(EXP_RESULTS_DIR, 'acc')
 
     if os.path.isfile(pickle_path):
         df = load_data(path=pickle_path)
