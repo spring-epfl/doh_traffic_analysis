@@ -348,8 +348,7 @@ FNAME_REGEX = re.compile('{name}/{dev}{sites}{date}{inst}'.format(**PATH_REGEX))
 # paths
 BASE_DIR = abspath(join(dirname(__file__), pardir, pardir, pardir))
 DATA_DIR = join(BASE_DIR, 'dataset')
-PICKLE_DIR = join(DATA_DIR, 'pickles')
-DEFAULT_PICKLE_FILE = join(PICKLE_DIR, 'index.pickle')
+DEFAULT_PICKLE_FILE = join(DATA_DIR, 'index.pickle')
 
 def load_data(path=DEFAULT_PICKLE_FILE, pickle=True):
     """Load dataset.
@@ -368,7 +367,7 @@ def load_data(path=DEFAULT_PICKLE_FILE, pickle=True):
         else:
             df = parse_directory(path)
             dataset = basename(normpath(path))
-            PICKLE_FILE = join(PICKLE_DIR, '%s.pickle' % dataset)
+            PICKLE_FILE = join(DATA_DIR, '%s.pickle' % dataset)
             if pickle:
                 pickle_path = PICKLE_FILE
                 if type(pickle) is str:
