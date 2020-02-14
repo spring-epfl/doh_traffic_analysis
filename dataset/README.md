@@ -31,14 +31,18 @@ The JSON file is of the format:
 
 ```
 {
-	sent: [],
-	received: [],
-	order: []
+	N.pcap : 
+	{
+		sent: [],
+		received: [],
+		order: []
+	}
 }
 ```
 
 where:
 
+- N.pcap -- N indicates the index of the website in the list of queried websites (see code/collection/short_list_1500 for an example)
 - sent -- an array of TLS record sizes, sent from the client to the resolver.
 - received -- an array of TLS record sizes, received by the client from the resolver.
 - order -- an array of +1 and -1 values, where +1 indicates outgoing (from client to resolver), and -1 indicates incoming (from resolver to client) records.
