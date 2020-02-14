@@ -36,7 +36,7 @@ def get_subsets(df, folds=10):
 	train_sets = []
 	test_sets = []
 	for k, (train, test) in enumerate(kf.split(df, df.class_label)):
-		print "Fold", k
+		print("Fold", k)
 		train_sets.append(df.iloc[train])
 		test_sets.append(df.iloc[test])
 	return train_sets, test_sets
@@ -48,12 +48,12 @@ def get_training_data(df_monitored_closed, df_unmonitored_closed, num_samples_mo
 	    We have 450 classes in unmonitored closed. We set number of samples to be 4 so that total samples = 1800."""
 	num_samples_unmonitored_closed = (num_samples_monitored_closed * num_classes_monitored_closed) / num_classes_unmonitored_closed
 	df_unmonitored_closed_trimmed = trim_sample_df(df_unmonitored_closed, num_samples_unmonitored_closed, map(str, range(num_classes_monitored_closed, num_classes_monitored_closed + num_classes_unmonitored_closed)))
-	print "Monitored closed training shape:", "Samples", num_samples_monitored_closed, "Classes", num_classes_monitored_closed, "Shape", df_monitored_closed.shape
-	print "Unmonitored closed training shape:", "Samples", num_samples_unmonitored_closed, "Classes", num_classes_unmonitored_closed, "Shape", df_unmonitored_closed_trimmed.shape
+	print("Monitored closed training shape:", "Samples", num_samples_monitored_closed, "Classes", num_classes_monitored_closed, "Shape", df_monitored_closed.shape)
+	print("Unmonitored closed training shape:", "Samples", num_samples_unmonitored_closed, "Classes", num_classes_unmonitored_closed, "Shape", df_unmonitored_closed_trimmed.shape)
 	return pd.concat([df_monitored_closed, df_unmonitored_closed_trimmed])
 
 def ow_experiment():
-	""" Function to run open world experiment. Creates monitored and unmonitored datasets from the LOC1 and OW datasets.	"""
+	""" Function to run open world experiment. Creates monitored and unmonitored datasets from the LOC1 and OW datasets."""
 
 	if not os.path.isdir(RESULTS_DIR):
         os.makedirs(RESULTS_DIR)
@@ -83,37 +83,37 @@ def ow_experiment():
 
 	#Trim closed world dataset
 	df_closed_trimmed = trim_sample_df(df_closed, num_samples_closed, map(str, range(num_classes_monitored_closed + num_classes_unmonitored_closed)))
-	print "Closed world shape:", "Samples", num_samples_closed, "Classes", num_classes_closed, "Shape", df_closed_trimmed.shape
+	print("Closed world shape:", "Samples", num_samples_closed, "Classes", num_classes_closed, "Shape", df_closed_trimmed.shape)
 	
 	#Get subsets for training by k-fold of closed world
 	df_closed_trimmed = df_closed
 	train_sets_closed, test_sets_closed = get_subsets(df_closed_trimmed)
 	
 	#Get open-unmonitored and split into subsets
-	print "Open world shape:", "Samples:", num_samples_test, df_open.shape
+	print("Open world shape:", "Samples:", num_samples_test, df_open.shape)
 	df_unmonitored_open = trim_sample_df(df_open, num_samples_test, map(str, range(1500, 1500 + num_classes_unmonitored_open)))
-	print "Unmonitored open shape:", df_unmonitored_open.shape
+	print("Unmonitored open shape:", df_unmonitored_open.shape)
 	test_sets_open = np.array_split(df_unmonitored_open, 10)
 	results = []
 
 	for i in range(0, len(train_sets_closed)):
-		print "Iteration:", i
+		print("Iteration:", i)
 		#Split closed world into monitored and un-monitored
 		df_closed = train_sets_closed[i]
-		print "Initial training subset shape:", df_closed.shape
+		print("Initial training subset shape:", df_closed.shape)
 		df_closed_trimmed = trim_sample_df(df_closed, num_samples_training, map(str, range(num_classes_monitored_closed + num_classes_unmonitored_closed)))
-		print "Trimming", df_closed_trimmed.shape
+		print("Trimming", df_closed_trimmed.shape)
 		df_monitored_closed = df_closed_trimmed[df_closed_trimmed["class_label"].astype(int) < 50]
 		df_unmonitored_closed = df_closed_trimmed[df_closed_trimmed["class_label"].astype(int) >= 50]
-		print "Monitored closed shape:", "Samples", num_samples_training, "Classes", num_classes_monitored_closed, "Shape", df_monitored_closed.shape
-		print "Unmonitored closed shape:", "Samples", num_samples_training, "Classes", num_classes_unmonitored_closed, "Shape", df_unmonitored_closed.shape
+		print("Monitored closed shape:", "Samples", num_samples_training, "Classes", num_classes_monitored_closed, "Shape", df_monitored_closed.shape)
+		print("Unmonitored closed shape:", "Samples", num_samples_training, "Classes", num_classes_unmonitored_closed, "Shape", df_unmonitored_closed.shape)
 		#Create training dataset
 		df_train = get_training_data(df_monitored_closed, df_unmonitored_closed, num_samples_monitored_closed, num_classes_unmonitored_closed, num_classes_monitored_closed)
-		print "Training data shape:", df_train.shape
+		print("Training data shape:", df_train.shape)
 		#Create test dataset out of closed + open
 		df_closed_test_trimmed = trim_sample_df(test_sets_closed[i], num_samples_test_closed, map(str, range(num_classes_monitored_closed + num_classes_unmonitored_closed)))
 		df_test = pd.concat([df_closed_test_trimmed, test_sets_open[i][:1000]])
-		print "Test data shape:", df_test.shape
+		print("Test data shape:", df_test.shape)
 		results.append(classify(df_train, df_test, OUTPUT_ACC, OUTPUT_PROB + str(i)))
 	
 	#Obtain classification reports

@@ -31,17 +31,16 @@ def print_stats_paper(report,  output, avg='macro avg', stats=['mean', 'std']):
     by_label = report.groupby('label').describe()
     with open(output, "w") as f:
         for stat in stats:
-            print >>f, "Statistic:", stat
-            print >>f, by_label.loc[avg].xs(stat, level=1)
-
+            f.write("Statistic: " + str(stat))
+            f.write(by_label.loc[avg].xs(stat, level=1).to_string())
+            f.write("\n")
 
 def report_true_pred(y_true, y_pred, i, tag):
     """Function to print true and predicted labels."""
     tag += str(i)
     with open(tag, "w") as f:
         for i in range(0, len(y_true)):
-            print >>f, y_true[i], y_pred[i]
-
+            f.write("%s %s\n" %(y_true[i], y_pred[i]))
 
 def describe_classif_reports(results, tag):
     """Function to obtain detailed classification report."""
@@ -61,7 +60,7 @@ def cross_validate(df, output_acc, folds=10):
     kf = StratifiedKFold(n_splits=folds)
     results = []
     for k, (train, test) in enumerate(kf.split(df, df.class_label)):
-        print "Fold", k
+        print("Fold", k)
         result = classify(df.iloc[train], df.iloc[test], output_acc)
         results.append(result)
     return results
@@ -72,7 +71,7 @@ def cross_classify(df1, df2, output_acc1, output_acc2, folds=10):
     df1_df2_accs, df2_df1_accs = [], []
     kf = StratifiedKFold(n_splits=folds)
     for k, ((df1_train, df1_test), (df2_train, df2_test)) in enumerate(zip(kf.split(df1, df1.class_label), kf.split(df2, df2.class_label))):
-        print "Fold", k
+        print("Fold", k)
         df1_df2_accs.append(classify(df1.iloc[df1_train], df2.iloc[df2_test], output_acc1, output_acc1 + "_" + str(k)))
         df2_df1_accs.append(classify(df2.iloc[df2_train], df1.iloc[df1_test], output_acc2, output_acc2 + "_" + str(k)))
     return df1_df2_accs, df2_df1_accs
@@ -102,17 +101,17 @@ def classify(train, test, output_acc, output_prob=""):
         with open(output_prob, "w") as f:
           class_names = [x for x in pipeline.classes_]
           s = '|'.join(class_names)
-          print >>f, "Truth", "|", s
+          f.write("Truth | " + s + "\n")
           truth_labels = list(test.class_label)
           for i in range(0, len(y_pred_prob)):
               preds = [str(x) for x in y_pred_prob[i]]
               preds = '|'.join(preds)
-              print >>f, truth_labels[i], "|", preds
+              f.write(truth_labels[i] +  " | " + preds + "\n")
 
     acc = accuracy_score(test.class_label, y_pred)
-    print "Accuracy Score:", acc
+    print("Accuracy Score:", acc)
     with open(output_acc, "a") as f:
-        print >>f, "Accuracy Score:", acc
+        f.write("Accuracy Score: " + str(acc))
 
     return list(test.class_label), list(y_pred)
 
@@ -125,7 +124,7 @@ def remove_strange(df, shortlist, urls):
         strange_urls = [x.strip() for x in lines]
 
     strange_urls = [urls.index(x) for x in strange_urls]
-    print len(strange_urls)
+    print(len(strange_urls))
     df = df[~df["class_label"].astype(int).isin(strange_urls)]
     return df
 
@@ -146,7 +145,7 @@ def get_url_list(url_list):
 
 
 def time_experiment():
-    """Performs the time experiment with LOC1 dataset (Section 5B of the paper)"""
+    """Performs the time experiment with LOC1 dataset (Section 5C of the paper)"""
     dataset = 'loc1'
     data_dir = join(DATA_DIR, dataset)
     pickle_path = join(CLASSIF_DIR, '%s.pickle' % dataset)
@@ -168,10 +167,10 @@ def time_experiment():
     training_intervals = [(pd.to_datetime(x, dayfirst=True), pd.to_datetime(y, dayfirst=True)) for x, y in training_intervals]
     
     for i in range(0, len(training_intervals)):
-        print "Testting:", test_interval
+        print("Testting:", test_interval)
         training_df = get_interval(df, training_intervals[i][0], training_intervals[i][1])
         training_df_trimmed, test_df_trimmed = trim_cross_comparison(training_df, test_df, num_samples, num_classes)
-        print "Start cross validation for:", training_intervals[i]
+        print("Start cross validation for:", training_intervals[i])
         start = time.time()
         tag = "_interval_test5_" + str(i)
         results, _ = cross_classify(training_df_trimmed, test_df_trimmed, OUTPUT_ACC + tag, OUTPUT_ACC + tag)
@@ -180,11 +179,11 @@ def time_experiment():
         with open(OUTPUT_REPORT + tag, "w") as f:
             f.write(report.to_string())
         stop = time.time()
-        print "Time taken:", stop - start
+        print("Time taken:", stop - start)
 
 
 def rpi_experiment(remove_bad=False):
-    """Performs the Desktop vs RPi experiment with LOC1 and RPI datasets (Section 5E of the paper)"""
+    """Performs the Desktop vs RPi experiment with LOC1 and RPI datasets (Section 5C of the paper)"""
 
     #Input data for RPi
     dataset = 'rpi'
@@ -223,7 +222,7 @@ def rpi_experiment(remove_bad=False):
 
     #to remove bad webpages
     if remove_bad:
-        print "delete strange webpages"
+        print("delete strange webpages")
         df = remove_strange(df, STRANGE_URL_LIST, urls)
         df_pi = remove_strange(df_pi, STRANGE_URL_LIST, urls)
 
@@ -231,15 +230,15 @@ def rpi_experiment(remove_bad=False):
     #delta = 8
     #df_pi["lengths"] = df_pi["lengths"] + delta
 
-    print "Trim data to required number of samples and classes"
+    print("Trim data to required number of samples and classes")
     desktop, rpi = trim_cross_comparison(df, df_pi, num_samples, num_classes)
     assert_dataset_size(desktop, num_samples, num_classes)
     assert_dataset_size(rpi, num_samples, num_classes)
    
-    print "Start cross validation"
+    print("Start cross validation")
     start = time.time()
     results_desk, results_rpi = cross_classify(desktop, rpi, output_accd, output_accr)
-    print "Write results"
+    print("Write results")
     report_desk = describe_classif_reports(results_desk, output_tpd)
     report_rpi = describe_classif_reports(results_rpi, output_tpr)
     print_stats_paper(report_desk, output_statisticsd)
@@ -249,7 +248,7 @@ def rpi_experiment(remove_bad=False):
     with open(output_reportr, "w") as f:
         f.write(report_rpi.to_string())
     stop = time.time()
-    print "Total time taken:", stop - start
+    print("Total time taken:", stop - start)
 
 
 def normal_experiment(remove_bad=False):
@@ -258,7 +257,7 @@ def normal_experiment(remove_bad=False):
     dataset = 'loc1'
     data_dir = join(DATA_DIR, dataset)
     pickle_path = join(DATA_DIR, 'pickles', '%s.pickle' % dataset)
-    print pickle_path
+    print(pickle_path)
     urls = get_url_list(ALL_URL_LIST)
     num_classes = 1500
     num_samples = 60
@@ -277,35 +276,35 @@ def normal_experiment(remove_bad=False):
 
     #To remove bad webpages
     if remove_bad:
-        print "Delete strange webpages"
+        print("Delete strange webpages")
         df = remove_strange(df, STRANGE_URL_LIST, urls)
 
-    print "Trim data to required number of samples and classes"
+    print("Trim data to required number of samples and classes")
     df_trimmed = trim_sample_df(df, num_samples, map(str, range(num_classes)))
-    print "Start cross validation"
+    print("Start cross validation")
     start = time.time()
     results = cross_validate(df_trimmed, OUTPUT_ACC)
-    print "Write results"
+    print("Write results")
     report = describe_classif_reports(results, OUTPUT_TP)
     print_stats_paper(report, OUTPUT_STATS)
     with open(OUTPUT_REPORT, "w") as f:
         f.write(report.to_string())
     stop = time.time()
-    print "Total time taken:", stop - start
+    print("Total time taken:", stop - start)
 
 if __name__ == '__main__':
     # parse args
     def help():
-        print "python classify_pipeline.py [-h] EXP_NAME"
-        print "\tEXP_NAME\tspecify an experiment: \'rpi\', \'normal\', \'time\'"
-        print "\t-h\t\tshows this message"
+        print("python classify_pipeline.py [-h] EXP_NAME")
+        print("\tEXP_NAME\tspecify an experiment: \'rpi\', \'normal\', \'time\'")
+        print("\t-h\t\tshows this message")
 
     if '-h' in sys.argv:
         help()
         sys.exit(-1)
 
     if len(sys.argv) != 2:
-        print "ERROR: Incorrect number of arguments"
+        print("ERROR: Incorrect number of arguments")
         help()
         sys.exit(-1)
 
