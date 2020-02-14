@@ -12,7 +12,7 @@ INTERVAL_TIME = 1 #Interval time between queries
 urls = []
 ct = 0
 
-fname = "short_list_500"
+fname = "/vagrant/short_list_1500"
 with open(fname) as f:
 	lines = f.readlines()
 	for line in lines:
@@ -25,7 +25,7 @@ display.start()
 print("Started display")
 
 #Change path of binary
-binary = FirefoxBinary('/home/sandra/Downloads/firefox/firefox')
+binary = FirefoxBinary('firefox/firefox')
 #Change resolver URL as required
 resolver_url = 'https://mozilla.cloudflare-dns.com/dns-query'
 #resolver_url = 'https://dns.google.com/experimental'
@@ -34,7 +34,7 @@ fp = webdriver.FirefoxProfile()
 fp.DEFAULT_PREFERENCES['frozen']["network.trr.mode"] = 2
 fp.DEFAULT_PREFERENCES['frozen']["network.trr.uri"] = resolver_url
 driver = webdriver.Firefox(executable_path='/usr/local/bin/geckodriver', firefox_binary=binary, firefox_profile=fp)
-print("Started driver")
+print("Started Firefox driver")
 
 url = 'http://' + url
 try:
